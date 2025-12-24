@@ -1,1 +1,2 @@
 # Football-Lookup
+This program is to look up player information in the API-Football and store them in a database. If there is not information in the database you can request it from API-Football and it stores it in the database. When you request existed information from the database it does it without requesting the information from API-Football. You request the following player information: Name, Age, Position, Nationality, and Number.
