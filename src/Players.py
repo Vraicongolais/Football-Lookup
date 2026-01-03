@@ -2,6 +2,8 @@
 # Football-Lookup
 import sqlite3
 import requests
+import os
+from dotenv import load_dotenv
 
 def get_connection(db_name):
     try:
@@ -49,7 +51,6 @@ class API_Client:
             print(f"Failed to retrieve data {player_response.status_code}")
 
 
-    
 class Player:
     def __init__(self, data):
         if isinstance(data, dict):
@@ -116,16 +117,28 @@ def fetch_players(connection, condition: str = None) -> list[tuple]:
     except Exception as e:
         print(e)
 
+def get_player(connection, name: str):
+    query = "SELECT id, name, age, position, nationality, number FROM players WHERE name = ?"
+
+    try:
+        with connection:
+           row = connection.execute(query, (name.lower(),)).fetchone()
+        return row
+    
+    except Exception as e:
+        print(e)
+
 def main():
-    API_KEY = ""
-    client = API_Client(API_KEY)
+    load_dotenv()
+    api_key = os.getenv("key")
+    client = API_Client(api_key)
     connection = get_connection("Players.db")
     done = False
 
     try:
         create_table(connection)
         while not done:
-            options = input("Enter option: (Add player, Search player, close): ").lower()
+            options = input("Enter option: (Add player, Search all player in DB (search), search a player (lookup), close): ").lower()
 
             if options == "add":
                 player_id = int(input("Enter the player ID: "))
@@ -140,9 +153,15 @@ def main():
                 for player in fetch_players(connection):
                     print(player)
             
+            elif options == "lookup":
+                print("Player Info")
+                name = input("Enter the name your are looking for: ")
+                for player in get_player(connection, name):
+                    print(player)
+            
             elif options == "close":
                 break
-    
+
     finally:
         connection.close()
 
